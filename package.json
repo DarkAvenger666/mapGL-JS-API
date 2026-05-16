@@ -1,6 +1,7 @@
 {
   "name": "mapgl-react-app",
   "version": "0.1.0",
+  "homepage": "https://DarkAvenger666.github.io/mapGL-JS-API",
   "private": true,
   "dependencies": {
     "@2gis/mapgl": "^1.31.1",
@@ -26,7 +27,9 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "prettier": "prettier --check \"./**/*.{ts,tsx,js,json,html,css,md}\"",
-    "prettier:write": "prettier --write \"./**/*.{ts,tsx,js,json,html,css,md}\""
+    "prettier:write": "prettier --write \"./**/*.{ts,tsx,js,json,html,css,md}\"",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [
@@ -47,6 +50,7 @@
     ]
   },
   "devDependencies": {
+    "gh-pages": "^6.3.0",
     "prettier": "^2.7.1"
   }
 }
