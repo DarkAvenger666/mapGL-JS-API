@@ -23,4 +23,4 @@ yarn-debug.log*
 yarn-error.log*
 
 
-/src/data/tiumenskaia-oblast.json
+/public/data/tiumenskaia-oblast.json

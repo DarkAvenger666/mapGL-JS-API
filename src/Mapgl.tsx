@@ -1,5 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { load } from '@2gis/mapgl';
+import mapgl from '@2gis/mapgl/types';
 import { useMapglContext } from './MapglContext';
 import { Clusterer } from '@2gis/mapgl-clusterer';
 import { RulerControl } from '@2gis/mapgl-ruler';
@@ -9,14 +10,30 @@ import { ControlRotateCounterclockwise } from './ControlRotateConterclockwise';
 import { MapWrapper } from './MapWrapper';
 import { FeatureCollection, Geometry, GeoJsonProperties } from
     'geojson';
-import geoData from './data/tiumenskaia-oblast.json';
+//import geoData from './data/tiumenskaia-oblast.json';
 
 export const MAP_CENTER = [65.533371, 57.152529];
 
 export default function Mapgl() {
     const { setMapglContext } = useMapglContext();
+    const [geoData, setGeoData] = useState<
+        FeatureCollection<Geometry, GeoJsonProperties> | null
+    >(null);
 
     useEffect(() => {
+        async function loadData() {
+            console.log();
+            const response = await fetch('/mapGL-JS-API/data/tiumenskaia-oblast.json');
+            const data = await response.json();
+
+            setGeoData(data);
+        }
+
+        loadData();
+    }, []);
+
+    useEffect(() => {
+        if (!geoData) return;
         let map: mapgl.Map | undefined = undefined;
         let directions: Directions | undefined = undefined;
         let clusterer: Clusterer | undefined = undefined;
@@ -32,9 +49,9 @@ export default function Mapgl() {
             
 
             map.on('click', (e) => console.log(e));
-            map.on('load', () => {
-                console.log(map.getStyle());
-            });
+            // map.on('load', () => {
+            //     console.log(map.getStyle());
+            // });
 
             /**
              * Ruler  plugin
@@ -71,6 +88,9 @@ export default function Mapgl() {
                     [55.35242563034581, 25.23925607042088],
                 ],
             });
+
+
+            
 
             const data: FeatureCollection<Geometry, GeoJsonProperties> =
                 geoData as FeatureCollection<Geometry, GeoJsonProperties>;
@@ -131,7 +151,7 @@ export default function Mapgl() {
             map && map.destroy();
             setMapglContext({ mapglInstance: undefined, mapgl: undefined });
         };
-    }, [setMapglContext]);
+    }, [setMapglContext, geoData]);
 
     useControlRotateClockwise();
 
