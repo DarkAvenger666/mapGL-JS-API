@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/mapGL-JS-API/static/css/main.7f4dc822.css",
-    "main.js": "/mapGL-JS-API/static/js/main.88521829.js",
+    "main.css": "/mapGL-JS-API/static/css/main.7fe102b4.css",
+    "main.js": "/mapGL-JS-API/static/js/main.cbc54779.js",
     "index.html": "/mapGL-JS-API/index.html",
-    "main.7f4dc822.css.map": "/mapGL-JS-API/static/css/main.7f4dc822.css.map",
-    "main.88521829.js.map": "/mapGL-JS-API/static/js/main.88521829.js.map"
+    "main.7fe102b4.css.map": "/mapGL-JS-API/static/css/main.7fe102b4.css.map",
+    "main.cbc54779.js.map": "/mapGL-JS-API/static/js/main.cbc54779.js.map"
   },
   "entrypoints": [
-    "static/css/main.7f4dc822.css",
-    "static/js/main.88521829.js"
+    "static/css/main.7fe102b4.css",
+    "static/js/main.cbc54779.js"
   ]
 }
