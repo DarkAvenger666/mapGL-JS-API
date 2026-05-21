@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { load } from '@2gis/mapgl';
 import mapgl from '@2gis/mapgl/types';
 import { useMapglContext } from './MapglContext';
@@ -12,18 +12,95 @@ import { FeatureCollection, Geometry, GeoJsonProperties } from
     'geojson';
 //import geoData from './data/tiumenskaia-oblast.json';
 
+type MapglProps = {
+    showAccidents: boolean;
+    showHeatLayer: boolean;
+};
+
 export const MAP_CENTER = [65.533371, 57.152529];
 
-export default function Mapgl() {
+export default function Mapgl({
+    showAccidents,
+    showHeatLayer,
+}: MapglProps) {
     const { setMapglContext } = useMapglContext();
     const [geoData, setGeoData] = useState<
         FeatureCollection<Geometry, GeoJsonProperties> | null
     >(null);
+    const [styleLoaded, setStyleLoaded] = useState(false);
+    const mapRef = useRef<mapgl.Map | null>(null);
+
+    const pointLayer = {
+        id: 'dtp-data-layer', // ID каждого слоя должен быть уникальным
+        // Фильтрация или выбор данных для этого слоя 
+        filter: [
+            'all',
+            [
+                'match',
+                ['sourceAttr', 'visible'],
+                [true],
+                true, // Значение при совпадении атрибута 'visible' источника со значением 'true' 
+                false, // Значение при несовпадении 
+            ]
+        ],
+        // Тип объекта отрисовки 
+        type: 'point',
+        // Стиль объекта отрисовки 
+        style: {
+            iconImage: ['match', ['get', 'severity'],
+                ['Легкий'], 'road-accident-slight', 'road-accident'],
+            iconWidth: 20,
+            textField: ['get', 'severity'],
+            textFont: ['Noto_Sans'],
+            textFontSize: 18,
+            textColor: '#ffffff',
+            iconPriority: 103,
+            textPriority: 100,
+        },
+    };
+
+    const heatLayer = {
+        id: 'dtp-heatmap-layer', // ID каждого слоя должен быть уникальным
+        // Фильтрация или выбор данных для этого слоя 
+        filter: [
+            'match',
+            ['sourceAttr', 'visible'],
+            [true],
+            true, // Значение при совпадении атрибута 'purpose' источника со значением 'heatmap' 
+            false, // Значение при несовпадении 
+        ],
+        // Тип объекта отрисовки 
+        type: 'heatmap',
+        // Стиль объекта отрисовки 
+        style: {
+            color: [
+                'interpolate',
+                ['linear'],
+                ['heatmap-density'],
+                0,
+                'rgba(0, 0, 0, 0)',
+                0.2,
+                'rgba(94, 69, 143, 1)',
+                0.4,
+                'rgba(28, 104, 149, 1)',
+                0.6,
+                'rgb(55, 165, 164)',
+                0.8,
+                'rgb(92, 255, 252)',
+                1,
+                'rgba(255, 255, 255, 1)',
+            ],
+            radius: 20,
+            intensity: 0.8,
+            opacity: 0.8,
+            downscale: 1,
+        },
+    };
 
     useEffect(() => {
         async function loadData() {
             console.log();
-            const response = await fetch('/mapGL-JS-API/data/tiumenskaia-oblast.json');
+            const response = await fetch('./mapGL-JS-API/data/tiumenskaia-oblast.json');
             const data = await response.json();
 
             setGeoData(data);
@@ -46,7 +123,7 @@ export default function Mapgl() {
                 style: '71c58a1a-1c5c-4ca2-9b29-fd11166dbf1b',
             });
 
-            
+            mapRef.current = map;
 
             map.on('click', (e) => console.log(e));
             // map.on('load', () => {
@@ -90,7 +167,7 @@ export default function Mapgl() {
             });
 
 
-            
+
 
             const data: FeatureCollection<Geometry, GeoJsonProperties> =
                 geoData as FeatureCollection<Geometry, GeoJsonProperties>;
@@ -104,38 +181,31 @@ export default function Mapgl() {
 
             // map.loadImage()
 
-            const layer = {
-                id: 'dtp-data-layer1', // ID каждого слоя должен быть уникальным
-                // Фильтрация или выбор данных для этого слоя 
-                filter: [
-                    'all',
-                    [
-                        'match',
-                        ['sourceAttr', 'visible'],
-                        [true],
-                        true, // Значение при совпадении атрибута 'visible' источника со значением 'true' 
-                        false, // Значение при несовпадении 
-                    ]
-                ],
-                // Тип объекта отрисовки 
-                type: 'point',
-                // Стиль объекта отрисовки 
-                style: {
-                    iconImage: ['match', ['get', 'severity'],
-                        ['Легкий'], 'road-accident-slight', 'road-accident'],
-                    iconWidth: 20,
-                    textField: ['get', 'severity'],
-                    textFont: ['Noto_Sans'],
-                    textFontSize: 18,
-                    textColor: '#ffffff',
-                    iconPriority: 103,
-                    textPriority: 100,
-                },
-            };
+            
+
+            // map.on('styleload', () => {
+            //     map?.addLayer(heatLayer);
+            // });
+
+            // map.on('styleload', () => {
+            //     map?.addLayer(pointLayer);
+            // });
 
             map.on('styleload', () => {
-                map?.addLayer(layer);
-            }); 
+                setStyleLoaded(true);
+            });
+
+            // if (showAccidents) {
+            //     map.addLayer(pointLayer);
+            // } else {
+            //     map.removeLayer("dtp-data-layer");
+            // }
+
+            // if (showHeatLayer) {
+            //     map.addLayer(heatLayer);
+            // } else {
+            //     map.removeLayer("dtp-heatmap-layer");
+            // }
 
             setMapglContext({
                 mapglInstance: map,
@@ -152,6 +222,31 @@ export default function Mapgl() {
             setMapglContext({ mapglInstance: undefined, mapgl: undefined });
         };
     }, [setMapglContext, geoData]);
+
+    useEffect(() => {
+        console.log(showAccidents, styleLoaded)
+        const map = mapRef.current;
+
+        if (!map || !styleLoaded) return;
+
+        if (showAccidents) {
+            map.addLayer(pointLayer);
+        } else {
+            map.removeLayer('dtp-data-layer');
+        }
+    }, [showAccidents, styleLoaded]);
+
+    useEffect(() => {
+        const map = mapRef.current;
+
+        if (!map || !styleLoaded) return;
+
+        if (showHeatLayer) {
+            map.addLayer(heatLayer);
+        } else {
+            map.removeLayer('dtp-heatmap-layer');
+        }
+    }, [showHeatLayer, styleLoaded]);
 
     useControlRotateClockwise();
 

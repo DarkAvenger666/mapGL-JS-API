@@ -4,8 +4,12 @@ import { MapglContextProvider } from './MapglContext';
 import ButtonRulerAddPreset from './ButtonRulerAddPreset';
 import ButtonResetMapCenter from './ButtonResetMapCenter';
 import ButtonRulerReset from './ButtonRulerReset';
+import { useState } from 'react';
 
 function App() {
+    const [showAccidents, setShowAccidents] = useState(false);
+    const [showHeatLayer, setShowHeatLayer] = useState(true);
+
     return (
         <MapglContextProvider>
             <div>
@@ -20,9 +24,31 @@ function App() {
                         <ButtonResetMapCenter />
                     </div>
                 </div>
+                <div className='map-layers-controls'>
+                    <div className='layer-control'>
+                        <label>
+                            <input
+                                type="checkbox"
+                                checked={showAccidents}
+                                onChange={() =>  setShowAccidents(v => !v)}
+                            />
+                            Points
+                        </label>
+                    </div>
+                    <div className='layer-control'>
+                        <label>
+                            <input
+                            type="checkbox" 
+                            checked={showHeatLayer}
+                            onChange={() => setShowHeatLayer(v => !v)}
+                            />
+                            Heat Map
+                        </label>
+                    </div>
+                </div>
 
                 <div className='App-map-container'>
-                    <Mapgl />
+                    <Mapgl showAccidents={showAccidents} showHeatLayer={showHeatLayer} />
                 </div>
             </div>
         </MapglContextProvider>
